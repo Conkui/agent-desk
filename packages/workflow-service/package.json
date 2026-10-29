@@ -1,0 +1,13 @@
+{
+    "name": "@agent-desk/workflow-service",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": "./src/index.ts",
+    "dependencies": {
+        "@agent-desk/contracts": "workspace:*",
+        "@agent-desk/workflow-core": "workspace:*",
+        "@agent-desk/agent-runtime": "workspace:*",
+        "@agent-desk/storage": "workspace:*"
+    }
+}

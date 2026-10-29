@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "jsx": "react-jsx",
+        "strict": true,
+        "skipLibCheck": true,
+        "noEmit": true,
+        "allowImportingTsExtensions": true,
+        "types": ["bun"],
+        "lib": ["ESNext", "DOM", "DOM.Iterable", "DOM.AsyncIterable"]
+    },
+    "include": [
+        "apps/**/*.ts",
+        "apps/**/*.tsx",
+        "packages/**/*.ts",
+        "scripts/independent/**/*.ts",
+        "tests/**/*.ts"
+    ],
+    "exclude": ["hapi", ".local", "node_modules"]
+}

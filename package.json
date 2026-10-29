@@ -1,0 +1,34 @@
+{
+    "name": "agent-desk",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "start": "bun apps/locald/src/main.ts",
+        "build": "bun --cwd apps/console --bun vite build",
+        "typecheck": "tsc --noEmit",
+        "test": "bun test packages apps/locald apps/console/src",
+        "verify": "bun scripts/independent/verify.ts"
+    },
+    "dependencies": {
+        "react": "19.2.3",
+        "react-dom": "19.2.3",
+        "zod": "4.2.1"
+    },
+    "devDependencies": {
+        "@types/bun": "1.3.14",
+        "@types/react": "19.2.7",
+        "@types/react-dom": "19.2.3",
+        "typescript": "5.9.3",
+        "vite": "7.3.0",
+        "@agent-desk/contracts": "workspace:*",
+        "@agent-desk/storage": "workspace:*",
+        "@agent-desk/provider-config": "workspace:*",
+        "@agent-desk/workflow-service": "workspace:*",
+        "@agent-desk/agent-runtime": "workspace:*"
+    }
+}

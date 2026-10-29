@@ -1,0 +1,16 @@
+{
+    "name": "@agent-desk/locald",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "@agent-desk/contracts": "workspace:*",
+        "@agent-desk/storage": "workspace:*",
+        "@agent-desk/provider-config": "workspace:*",
+        "@agent-desk/agent-runtime": "workspace:*",
+        "@agent-desk/agent-adapters": "workspace:*",
+        "@agent-desk/workflow-service": "workspace:*",
+        "@agent-desk/transport": "workspace:*",
+        "zod": "4.2.1"
+    }
+}

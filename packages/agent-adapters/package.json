@@ -1,0 +1,14 @@
+{
+    "name": "@agent-desk/agent-adapters",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": "./src/index.ts",
+    "dependencies": {
+        "@agent-desk/agent-catalog": "workspace:*",
+        "@agent-desk/agent-runtime": "workspace:*",
+        "@agent-desk/contracts": "workspace:*",
+        "@agent-desk/provider-config": "workspace:*",
+        "eventsource-parser": "4.1.3"
+    }
+}
