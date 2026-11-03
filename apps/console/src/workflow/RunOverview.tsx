@@ -9,6 +9,7 @@ import { resultText, reportFilename, runReport } from "./run-report";
 import { useMessageDraft } from "./use-message-draft";
 import { approvalTitle } from "./approval-details";
 import { ApprovalHistory } from "./ApprovalHistory";
+import { pendingApprovals } from "./approval-state";
 
 export function RunOverview({
   run,
@@ -90,26 +91,20 @@ export function RunOverview({
                 </button>
               ))}
             </section>
-            {run.approvals
-              .filter(
-                (item) =>
-                  item.state === "pending" &&
-                  ["running", "waiting_approval"].includes(run.state),
-              )
-              .map((approval) => (
-                <button
-                  className="pending-approval"
-                  key={approval.id}
-                  onClick={() => {
-                    onClose();
-                    onSelect(approval.memberId);
-                  }}
-                >
-                  待审批 · {name(approval.memberId)} ·{" "}
-                  {approvalTitle(approval.tool)}
-                  <ArrowRight size={14} />
-                </button>
-              ))}
+            {pendingApprovals(run).map((approval) => (
+              <button
+                className="pending-approval"
+                key={approval.id}
+                onClick={() => {
+                  onClose();
+                  onSelect(approval.memberId);
+                }}
+              >
+                待审批 · {name(approval.memberId)} ·{" "}
+                {approvalTitle(approval.tool)}
+                <ArrowRight size={14} />
+              </button>
+            ))}
             {run.error && (
               <p role="alert" className="error">
                 {run.error}

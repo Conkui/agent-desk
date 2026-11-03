@@ -5,11 +5,13 @@ export function ApprovalCard({
   approval,
   active,
   busy,
+  closedLabel,
   onResolve,
 }: {
   approval: Approval;
   active: boolean;
   busy: boolean;
+  closedLabel?: string;
   onResolve: (decision: "allow" | "deny") => void;
 }) {
   const detail = approvalDetails(approval.tool, approval.detail);
@@ -43,7 +45,7 @@ export function ApprovalCard({
           </button>
         </div>
       ) : (
-        <p className="approval-closed">本轮已结束</p>
+        <p className="approval-closed">{closedLabel ?? "本轮已结束"}</p>
       )}
     </section>
   );

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import type { Run, Workflow } from "@agent-desk/contracts";
 import { cliNames, labels } from "../components";
+import { pendingApprovals } from "./approval-state";
 import "@xyflow/react/dist/style.css";
 import {
   arrangeNodes,
@@ -187,10 +188,9 @@ export function WorkflowCanvas({
             "messages" in member && Array.isArray(member.messages)
               ? member.messages.length
               : 0,
-          pending:
-            run?.approvals.filter(
-              (item) => item.memberId === member.id && item.state === "pending",
-            ).length ?? 0,
+          pending: pendingApprovals(run).filter(
+            (item) => item.memberId === member.id,
+          ).length,
           onOpen: () => onSelect(member.id),
           onConfigure: onConfigure ? () => onConfigure(member.id) : undefined,
         },

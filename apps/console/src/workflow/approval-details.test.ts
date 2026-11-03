@@ -1,5 +1,9 @@
 import { expect, test } from "bun:test";
-import { approvalDetails, approvalTitle } from "./approval-details";
+import {
+  approvalDetails,
+  approvalTitle,
+  toolSummary,
+} from "./approval-details";
 test("read approvals show their actual targets and retain the original request", () => {
   const raw = JSON.stringify({
     patterns: ["E:/work/a.txt", "E:/work/b.txt"],
@@ -31,4 +35,16 @@ test("unknown and invalid details remain visible and do not invent targets", () 
     '{"patterns":true}',
   ]);
   expect(approvalTitle("constructor")).toBe("constructor");
+});
+
+test("historical tool calls cannot appear running after the process is released", () => {
+  const text = "read · running\nfile details";
+  expect(toolSummary(text, { state: "failed", cleanupState: "released" })).toBe(
+    "读取文件 · 未完成",
+  );
+  expect(toolSummary(text, { state: "running" })).toBe("读取文件 · 进行中");
+  expect(toolSummary(text, { state: "failed", cleanupState: "unknown" })).toBe(
+    "读取文件 · 状态待核对",
+  );
+  expect(toolSummary("read · completed", null)).toBe("读取文件 · 已完成");
 });

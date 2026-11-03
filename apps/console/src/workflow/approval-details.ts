@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Run } from "@agent-desk/contracts";
 
 const DetailSchema = z.object({
   patterns: z.array(z.string()).optional(),
@@ -25,6 +26,31 @@ const titles: Record<string, string> = {
 };
 export function approvalTitle(tool: string) {
   return Object.hasOwn(titles, tool) ? titles[tool] : tool;
+}
+
+export function toolSummary(
+  text: string,
+  run: Pick<Run, "state" | "cleanupState"> | null,
+) {
+  const first = text.split("\n", 1)[0],
+    parts = first.split(" · ");
+  if (parts.length !== 2) return first;
+  const [tool, status] = parts;
+  const finished =
+    run?.cleanupState === "released" &&
+    ["failed", "stopped", "completed"].includes(run.state);
+  const uncertain =
+    run?.state === "needs_reconcile" ||
+    (!!run &&
+      ["failed", "stopped", "completed"].includes(run.state) &&
+      run.cleanupState !== "released");
+  const labels: Record<string, string> = {
+    pending: "等待执行",
+    running: finished ? "未完成" : uncertain ? "状态待核对" : "进行中",
+    completed: "已完成",
+    error: "执行失败",
+  };
+  return `${approvalTitle(tool)} · ${Object.hasOwn(labels, status) ? labels[status] : status}`;
 }
 
 /** Show the actual paths/command without interpreting shell syntax or changing

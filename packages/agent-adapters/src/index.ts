@@ -81,6 +81,7 @@ export class OpenCodeRuntime implements Runtime {
     method = "GET",
     body?: unknown,
     signal?: AbortSignal,
+    longLived = false,
   ): Promise<any> {
     try {
       const response = await fetch(native.url + path, {
@@ -92,6 +93,9 @@ export class OpenCodeRuntime implements Runtime {
         body: body === undefined ? undefined : JSON.stringify(body),
         signal,
         redirect: "error",
+        // Bun 1.3.14 defaults to a five-minute fetch timeout. A turn can
+        // legitimately wait longer for the user's approval; stop still aborts it.
+        ...(longLived ? { timeout: false } : {}),
       });
       if (!response.ok)
         throw new AppError(
@@ -234,6 +238,7 @@ export class OpenCodeRuntime implements Runtime {
       headers: { authorization: native.auth },
       signal: native.abort.signal,
       redirect: "error",
+      ...{ timeout: false },
     });
     if (!response.ok || !response.body)
       throw new AppError("runtime_events", "无法订阅 OpenCode 输出。", 502);
@@ -375,6 +380,7 @@ export class OpenCodeRuntime implements Runtime {
           : {}),
       },
       native.abort.signal,
+      true,
     );
     // A rejected native tool can end the turn with finish=tool-calls and no
     // final text. It is an interrupted task, never a completed worker result.

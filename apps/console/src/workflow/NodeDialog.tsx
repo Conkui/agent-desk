@@ -13,6 +13,8 @@ import { command } from "../api";
 import { MessageBody } from "./MessageBody";
 import { useMessageDraft } from "./use-message-draft";
 import { ApprovalCard } from "./ApprovalCard";
+import { canResolveApprovals } from "./approval-state";
+import { toolSummary } from "./approval-details";
 
 type Member = Workflow["members"][number] | RunMember;
 export function NodeDialog({
@@ -49,6 +51,27 @@ export function NodeDialog({
   const log = useRef<HTMLDivElement>(null),
     followTail = useRef(true);
   const messages = member && "messages" in member ? member.messages : [];
+  const pending = (run?.approvals ?? []).filter(
+    (item) => item.memberId === member?.id && item.state === "pending",
+  );
+  const cards =
+    run &&
+    pending.map((approval) => (
+      <ApprovalCard
+        key={approval.id}
+        approval={approval}
+        active={canResolveApprovals(run)}
+        busy={busy}
+        closedLabel={run.state === "needs_reconcile" ? "状态待核对" : undefined}
+        onResolve={(decision) =>
+          void action(`/runs/${run.id}/approvals/${approval.id}/resolve`, {
+            ...command(),
+            expectedVersion: run.version,
+            decision,
+          })
+        }
+      />
+    ));
   const handoffs = (run?.handoffs ?? []).filter((item) =>
     tab === "incoming" ? item.to === member?.id : item.from === member?.id,
   );
@@ -209,7 +232,7 @@ export function NodeDialog({
                       </div>
                       {message.role === "tool" ? (
                         <details className="tool-output">
-                          <summary>{message.text.split("\n")[0]}</summary>
+                          <summary>{toolSummary(message.text, run)}</summary>
                           <MessageBody
                             text={message.text.split("\n").slice(1).join("\n")}
                             plain
@@ -243,31 +266,14 @@ export function NodeDialog({
             </p>
           )}
           <div className="node-approvals">
-            {run &&
-              member &&
-              run.approvals
-                .filter(
-                  (item) =>
-                    item.memberId === member.id && item.state === "pending",
-                )
-                .map((approval) => (
-                  <ApprovalCard
-                    key={approval.id}
-                    approval={approval}
-                    active={["running", "waiting_approval"].includes(run.state)}
-                    busy={busy}
-                    onResolve={(decision) =>
-                      void action(
-                        `/runs/${run.id}/approvals/${approval.id}/resolve`,
-                        {
-                          ...command(),
-                          expectedVersion: run.version,
-                          decision,
-                        },
-                      )
-                    }
-                  />
-                ))}
+            {canResolveApprovals(run) ? (
+              cards
+            ) : pending.length > 0 ? (
+              <details className="closed-approvals">
+                <summary>未处理审批 · {pending.length}</summary>
+                {cards}
+              </details>
+            ) : null}
           </div>
           {run?.state === "awaiting_confirmation" && member ? (
             <form

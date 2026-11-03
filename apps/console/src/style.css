@@ -1614,6 +1614,14 @@ textarea {
 .node-approvals:empty {
   display: none;
 }
+.closed-approvals > summary {
+  cursor: pointer;
+  color: #65756b;
+  font-size: 12px;
+}
+.closed-approvals[open] > summary {
+  margin-bottom: 10px;
+}
 .node-approvals .approval {
   margin: 0 0 10px;
   padding: 14px;

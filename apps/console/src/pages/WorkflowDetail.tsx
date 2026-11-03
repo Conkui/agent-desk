@@ -11,6 +11,8 @@ import { runBlocksStart } from "@agent-desk/contracts";
 import { command, request } from "../api";
 import { Status, labels } from "../components";
 import { WorkflowCanvas } from "../workflow/WorkflowCanvas";
+import { acceptRefresh, newestRun } from "../workflow/refresh-gate";
+import { pendingApprovals } from "../workflow/approval-state";
 const NodeDialog = lazy(() =>
   import("../workflow/NodeDialog").then((module) => ({
     default: module.NodeDialog,
@@ -55,29 +57,49 @@ export function WorkflowDetail({
     >("activity");
   const currentRun = useRef<string | null>(null);
   const refreshGeneration = useRef(0);
+  const appliedGeneration = useRef(0);
   const pendingCommand = useRef<{ key: string; id: string } | null>(null);
   const refresh = useCallback(async () => {
     const generation = ++refreshGeneration.current;
+    const selectedRun = currentRun.current;
     try {
       const data = await request<{ workflow: Workflow; runs: RunSummary[] }>(
         `/workflows/${workflowId}`,
       );
       const history = data.runs;
       const chosen =
-        history.find((item) => item.id === currentRun.current) ?? history[0];
+        history.find((item) => item.id === selectedRun) ?? history[0];
       // Pull only the selected run. Other workflows and historical message bodies stay out of this view.
       const snapshot = chosen
         ? (await request<{ run: Run }>(`/runs/${chosen.id}`)).run
         : null;
-      if (generation !== refreshGeneration.current) return;
+      if (
+        !acceptRefresh(
+          generation,
+          appliedGeneration.current,
+          selectedRun,
+          currentRun.current,
+        )
+      )
+        return;
+      appliedGeneration.current = generation;
       setWorkflow(data.workflow);
       setRuns(history);
-      setRun(snapshot);
+      setRun((current) => newestRun(current, snapshot));
       setLoadError("");
       if (chosen) currentRun.current = chosen.id;
     } catch (error) {
-      if (generation === refreshGeneration.current)
+      if (
+        acceptRefresh(
+          generation,
+          appliedGeneration.current,
+          selectedRun,
+          currentRun.current,
+        )
+      ) {
+        appliedGeneration.current = generation;
         setLoadError((error as Error).message);
+      }
     }
   }, [workflowId]);
   useEffect(() => {
@@ -202,9 +224,7 @@ export function WorkflowDetail({
           {displayRun && (
             <button onClick={() => setOverviewOpen(true)}>
               进度与结果
-              {displayRun.approvals.some((item) => item.state === "pending")
-                ? " · 待审批"
-                : ""}
+              {pendingApprovals(displayRun).length > 0 ? " · 待审批" : ""}
             </button>
           )}
           <button

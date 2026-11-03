@@ -1,9 +1,10 @@
 import type { Run } from "@agent-desk/contracts";
 import { approvalDetails } from "./approval-details";
+import { canResolveApprovals } from "./approval-state";
 
 export function ApprovalHistory({ run }: { run: Run }) {
   if (!run.approvals.length) return null;
-  const active = ["running", "waiting_approval"].includes(run.state);
+  const active = canResolveApprovals(run);
   return (
     <details className="run-approval-history">
       <summary>审批记录 · {run.approvals.length}</summary>
